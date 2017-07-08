@@ -26,7 +26,7 @@ class Morse:
         self.v4 = IntVar()
         self.v5 = IntVar()
         
-        self.title = Label(master, text="Morse Code School", font=("Helvetica", 30), bg=bg)
+        self.title = Label(master, text="Morse Code School", font=("Verdana", 30), bg=bg)
         self.rmargin = Label(master, text="", width=5, bg=bg)
         self.rcmargin = Label(master, text="", width=3, bg=bg)
         self.lcmargin = Label(master, text="", width=2, bg=bg)
@@ -38,18 +38,25 @@ class Morse:
         self.text = Text(master, height=10, width=24)
         self.text.insert(1.0, "Insert text here.")
         relief = "solid"
-        alphabet = [
+        
+        self.alphabet = [
             ["t", "a", "e", "n", "i", "m"],
             ["s", "o", "r", "h", "u", "d"],
             ["k", "c", "w", "l", "g", "p"],
             ["f", "y", "b", "v", "j", "z"],
             ["q", "x", ".", "?"],
         ]
+        self.vars = [[],[],[],[],[]]
+        for i in range(len(self.alphabet)):
+            for j in range(len(self.alphabet[i])):
+                self.vars[i].append(StringVar())
         self.keyboard = [[],[],[],[],[]]
-        for i in range(len(alphabet)):
-            for j in range(len(alphabet[i])):
-                self.keyboard[i].append(Label(master, text=alphabet[i][j], padx=14, pady=4, bg=bg))
-        
+        for i in range(len(self.alphabet)):
+            for j in range(len(self.alphabet[i])):
+                self.vars[i][j].set(self.alphabet[i][j])
+                self.keyboard[i].append(Label(master, textvariable=self.vars[i][j], width=4, pady=4, bg=bg))
+        self.switch = Button(text="./-", width=2, command=self.toggle, highlightbackground=bg)
+
         self.group1 = Checkbutton(master, text="Group 1", bg=bg, variable=self.v1, command=self.c1)
         self.group2 = Checkbutton(master, text="Group 2", bg=bg, variable=self.v2, command=self.c2)
         self.group3 = Checkbutton(master, text="Group 3", bg=bg, variable=self.v3, command=self.c3)
@@ -70,6 +77,7 @@ class Morse:
         self.translate = Text(master, height=3, width=47)
 
         self.hide_conv = Checkbutton(master, text="Hide", bg=bg, variable=self.hidden_conv, command=self.hide)
+        self.regen = Button(master, text="Generate", highlightbackground=bg, command=self.generate)
         self.hide_text = Checkbutton(master, text="Hide", bg=bg, variable=self.hidden_text, command=self.hide2)
 
         # Create layout
@@ -82,6 +90,7 @@ class Morse:
         for i in range(len(self.keyboard)):
             for j in range(len(self.keyboard[i])):
                 self.keyboard[i][j].grid(row=3+i, column=7+j, sticky="ew")
+        self.switch.grid(row=7, column=11, columnspan=2, sticky="e")
         self.lcmargin.grid(row=0, column=13, rowspan=10)
         self.group1.grid(row=3, column=14)
         self.group2.grid(row=4, column=14)
@@ -101,8 +110,9 @@ class Morse:
         self.translate.grid(row=11, column=7, columnspan=8, rowspan=5, sticky="ns")
 
         self.bmargin.grid(row=16, column=0, columnspan=15)
-        self.hide_conv.grid(row=17, column=2, columnspan=2)
-        self.hide_text.grid(row=17, column=12, columnspan=2, sticky="e")
+        self.hide_conv.grid(row=17, column=1, columnspan=2)
+        self.regen.grid(row=17, column=11, columnspan=3)
+        self.hide_text.grid(row=17, column=13, columnspan=2, sticky="e")
 
     def c1(self):
         if (not self.v1.get()):
@@ -190,9 +200,21 @@ class Morse:
         morse = self.words2morse(text)
         if (not self.muted.get()):
             self.musicbox.play(morse, freq, speed)
-        
+
+    def toggle(self):
+        if self.switch.config('text')[-1] == './-':
+            self.switch.config(text='Abc')
+            for i in range(len(self.alphabet)):
+                for j in range(len(self.alphabet[i])):
+                    self.vars[i][j].set(self.words2morse(self.alphabet[i][j]))
+        else:
+            self.switch.config(text='./-')
+            for i in range(len(self.alphabet)):
+                for j in range(len(self.alphabet[i])):
+                    self.vars[i][j].set(self.alphabet[i][j])
+
     def words2morse(self, string):
-        ALPHABET = {"a" : ".-", "b" : "-...", "c" : "-.-.", "d" : "-..",
+        alphabet = {"a" : ".-", "b" : "-...", "c" : "-.-.", "d" : "-..",
                 "e" : ".", "f" : "..-.", "g" : "--.", "h" : "....",
                 "i" : "..", "j" : ".---", "k" : "-.-", "l" : ".-..",
                 "m" : "--", "n" : "-.", "o" : "---", "p" : ".--.",
@@ -202,8 +224,8 @@ class Morse:
                 " " : "/"}
         code = ""
         for char in string:
-            if char in ALPHABET.keys():
-                code += ALPHABET[char.lower()] + " "
+            if char in alphabet.keys():
+                code += alphabet[char.lower()] + " "
         return code
 
 root = Tk()

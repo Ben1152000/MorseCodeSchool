@@ -42,15 +42,19 @@ class MusicBox:
         self.tone(self.stream, 1/float(1.2/float(FARNS)), number * (1.2/float(FARNS)))
 
     def play(self, code, frequency, speed):
-        for char in code:
-            if char == ".":
-                self.dot(frequency); self.rest()
-            elif char == "-":
-                self.dash(frequency); self.rest()
-            elif char == " ":
-                self.pause(2, speed)
-            elif char == "/":
-                self.pause(6, speed)
+        words = code.lower().split()
+        for i in range(len(words)):
+            for j in range(len(words[i])):
+                if words[i][j] == ".":
+                    self.dot(frequency)
+                elif words[i][j] == "-":
+                    self.dash(frequency)
+                elif words[i][j] == "/":
+                    self.pause(1, speed)
+                if j + 1 != len(words[i]):
+                    self.rest()
+            if i + 1 != len(words):
+                self.pause(3, speed)
 
     def close(self):
         STREAM.close()
